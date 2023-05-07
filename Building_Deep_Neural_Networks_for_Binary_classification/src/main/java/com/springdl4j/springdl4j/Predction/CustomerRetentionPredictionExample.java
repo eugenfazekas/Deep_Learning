@@ -1,12 +1,15 @@
 package com.springdl4j.springdl4j.Predction;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.records.reader.impl.transform.TransformProcessRecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
-import org.datavec.api.util.ndarray.RecordConverter;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.DataSetIteratorSplitter;
@@ -33,10 +36,6 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.impl.LossMCXENT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 
 public class CustomerRetentionPredictionExample {
 
@@ -107,15 +106,15 @@ public class CustomerRetentionPredictionExample {
                                                                     .layer(new DenseLayer.Builder().nIn(6).nOut(4).activation(Activation.RELU).dropOut(0.9).build())
                                                                     .layer(new OutputLayer.Builder(new LossMCXENT(weightsArray)).nIn(4).nOut(2).activation(Activation.SOFTMAX).build())
                                                                     .build();
-
-        final UIServer uiServer = UIServer.getInstance();
-        final StatsStorage statsStorage = new InMemoryStatsStorage();
+        
+       // final UIServer uiServer = UIServer.getInstance();
+        //final StatsStorage statsStorage = new InMemoryStatsStorage();
 
         final MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(configuration);
         multiLayerNetwork.init();
-        multiLayerNetwork.setListeners(new ScoreIterationListener(100),
-                                       new StatsListener(statsStorage));
-        uiServer.attach(statsStorage);
+        
+       // multiLayerNetwork.setListeners(new ScoreIterationListener(100),new StatsListener(statsStorage));
+        //uiServer.attach(statsStorage);
         multiLayerNetwork.fit(dataSetIteratorSplitter.getTrainIterator(),100);
 
         final Evaluation evaluation =  multiLayerNetwork.evaluate(dataSetIteratorSplitter.getTestIterator(),Arrays.asList("0","1"));
@@ -124,7 +123,6 @@ public class CustomerRetentionPredictionExample {
         final File file = new File("model.zip");
         ModelSerializer.writeModel(multiLayerNetwork,file,true);
         ModelSerializer.addNormalizerToModel(file,dataNormalization);
-
 
     }
 }
